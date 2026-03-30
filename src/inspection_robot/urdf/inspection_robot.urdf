@@ -1,0 +1,568 @@
+<?xml version="1.0"?>
+<robot name="inspection_robot">
+
+  <!-- ═══════════════════════════════════════
+       MATERIALS
+  ═══════════════════════════════════════ -->
+  <material name="body_yellow">
+    <color rgba="0.95 0.75 0.10 1.0"/>
+  </material>
+  <material name="dark_panel">
+    <color rgba="0.15 0.15 0.15 1.0"/>
+  </material>
+  <material name="wheel_black">
+    <color rgba="0.08 0.08 0.08 1.0"/>
+  </material>
+  <material name="sensor_blue">
+    <color rgba="0.10 0.30 0.80 1.0"/>
+  </material>
+  <material name="camera_black">
+    <color rgba="0.05 0.05 0.05 1.0"/>
+  </material>
+  <material name="pole_gray">
+    <color rgba="0.50 0.50 0.50 1.0"/>
+  </material>
+
+  <!-- ═══════════════════════════════════════
+       BASE FOOTPRINT
+  ═══════════════════════════════════════ -->
+  <link name="base_footprint"/>
+
+  <joint name="base_footprint_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child  link="base_link"/>
+    <origin xyz="0 0 0.13" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ═══════════════════════════════════════
+       BASE LINK
+  ═══════════════════════════════════════ -->
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.70 0.45 0.20"/>
+      </geometry>
+      <material name="body_yellow"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.70 0.45 0.20"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="20.0"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.3263" ixy="0.0" ixz="0.0"
+               iyy="0.5817" iyz="0.0" izz="0.7938"/>
+    </inertial>
+  </link>
+
+  <!-- ═══════════════════════════════════════
+       TOP DARK PANEL
+  ═══════════════════════════════════════ -->
+  <link name="top_panel">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.65 0.40 0.025"/>
+      </geometry>
+      <material name="dark_panel"/>
+    </visual>
+    <inertial>
+      <mass value="0.5"/>
+      <inertia ixx="0.001" ixy="0.0" ixz="0.0"
+               iyy="0.001" iyz="0.0" izz="0.001"/>
+    </inertial>
+  </link>
+
+  <joint name="top_panel_joint" type="fixed">
+    <parent link="base_link"/>
+    <child  link="top_panel"/>
+    <origin xyz="0 0 0.1125" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ═══════════════════════════════════════
+       FRONT LEFT — STEERING HUB + WHEEL
+       steering_fl_joint : revolute Z  (pivots the wheel to steer)
+       wheel_fl_joint     : continuous Y (spins to drive)
+  ═══════════════════════════════════════ -->
+  <link name="steering_fl">
+    <inertial>
+      <mass value="0.3"/>
+      <inertia ixx="0.0001" ixy="0.0" ixz="0.0"
+               iyy="0.0001" iyz="0.0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <joint name="steering_fl_joint" type="revolute">
+    <parent link="base_link"/>
+    <child  link="steering_fl"/>
+    <origin xyz="0.25 0.265 -0.13" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-1.5708" upper="1.5708" effort="10.0" velocity="3.0"/>
+    <dynamics damping="5.0" friction="2.0"/>
+  </joint>
+
+  <link name="wheel_fl">
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <geometry><cylinder radius="0.13" length="0.08"/></geometry>
+      <material name="wheel_black"/>
+    </visual>
+    <!-- No collision: planar_move drives the body directly.
+         Wheel collision geometry caused lidar ghost obstacles when
+         steering joints flopped to off-axis positions. -->
+    <inertial>
+      <mass value="2.0"/>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <inertia ixx="0.0085" ixy="0.0" ixz="0.0"
+               iyy="0.0085" iyz="0.0" izz="0.0169"/>
+    </inertial>
+  </link>
+
+  <joint name="wheel_fl_joint" type="continuous">
+    <parent link="steering_fl"/>
+    <child  link="wheel_fl"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <dynamics damping="0.1" friction="0.0"/>
+  </joint>
+
+  <!-- ═══════════════════════════════════════
+       FRONT RIGHT — STEERING HUB + WHEEL
+  ═══════════════════════════════════════ -->
+  <link name="steering_fr">
+    <inertial>
+      <mass value="0.3"/>
+      <inertia ixx="0.0001" ixy="0.0" ixz="0.0"
+               iyy="0.0001" iyz="0.0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <joint name="steering_fr_joint" type="revolute">
+    <parent link="base_link"/>
+    <child  link="steering_fr"/>
+    <origin xyz="0.25 -0.265 -0.13" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-1.5708" upper="1.5708" effort="10.0" velocity="3.0"/>
+    <dynamics damping="5.0" friction="2.0"/>
+  </joint>
+
+  <link name="wheel_fr">
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <geometry><cylinder radius="0.13" length="0.08"/></geometry>
+      <material name="wheel_black"/>
+    </visual>
+    <inertial>
+      <mass value="2.0"/>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <inertia ixx="0.0085" ixy="0.0" ixz="0.0"
+               iyy="0.0085" iyz="0.0" izz="0.0169"/>
+    </inertial>
+  </link>
+
+  <joint name="wheel_fr_joint" type="continuous">
+    <parent link="steering_fr"/>
+    <child  link="wheel_fr"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <dynamics damping="0.1" friction="0.0"/>
+  </joint>
+
+  <!-- ═══════════════════════════════════════
+       REAR LEFT — STEERING HUB + WHEEL
+  ═══════════════════════════════════════ -->
+  <link name="steering_rl">
+    <inertial>
+      <mass value="0.3"/>
+      <inertia ixx="0.0001" ixy="0.0" ixz="0.0"
+               iyy="0.0001" iyz="0.0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <joint name="steering_rl_joint" type="revolute">
+    <parent link="base_link"/>
+    <child  link="steering_rl"/>
+    <origin xyz="-0.25 0.265 -0.13" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-1.5708" upper="1.5708" effort="10.0" velocity="3.0"/>
+    <dynamics damping="5.0" friction="2.0"/>
+  </joint>
+
+  <link name="wheel_rl">
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <geometry><cylinder radius="0.13" length="0.08"/></geometry>
+      <material name="wheel_black"/>
+    </visual>
+    <inertial>
+      <mass value="2.0"/>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <inertia ixx="0.0085" ixy="0.0" ixz="0.0"
+               iyy="0.0085" iyz="0.0" izz="0.0169"/>
+    </inertial>
+  </link>
+
+  <joint name="wheel_rl_joint" type="continuous">
+    <parent link="steering_rl"/>
+    <child  link="wheel_rl"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <dynamics damping="0.1" friction="0.0"/>
+  </joint>
+
+  <!-- ═══════════════════════════════════════
+       REAR RIGHT — STEERING HUB + WHEEL
+  ═══════════════════════════════════════ -->
+  <link name="steering_rr">
+    <inertial>
+      <mass value="0.3"/>
+      <inertia ixx="0.0001" ixy="0.0" ixz="0.0"
+               iyy="0.0001" iyz="0.0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <joint name="steering_rr_joint" type="revolute">
+    <parent link="base_link"/>
+    <child  link="steering_rr"/>
+    <origin xyz="-0.25 -0.265 -0.13" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-1.5708" upper="1.5708" effort="10.0" velocity="3.0"/>
+    <dynamics damping="5.0" friction="2.0"/>
+  </joint>
+
+  <link name="wheel_rr">
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <geometry><cylinder radius="0.13" length="0.08"/></geometry>
+      <material name="wheel_black"/>
+    </visual>
+    <inertial>
+      <mass value="2.0"/>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <inertia ixx="0.0085" ixy="0.0" ixz="0.0"
+               iyy="0.0085" iyz="0.0" izz="0.0169"/>
+    </inertial>
+  </link>
+
+  <joint name="wheel_rr_joint" type="continuous">
+    <parent link="steering_rr"/>
+    <child  link="wheel_rr"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <dynamics damping="0.1" friction="0.0"/>
+  </joint>
+
+  <!-- ═══════════════════════════════════════
+       LIDAR POLE
+  ═══════════════════════════════════════ -->
+  <link name="lidar_pole">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.025" length="0.20"/>
+      </geometry>
+      <material name="pole_gray"/>
+    </visual>
+    <inertial>
+      <mass value="0.2"/>
+      <inertia ixx="0.0001" ixy="0.0" ixz="0.0"
+               iyy="0.0001" iyz="0.0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <joint name="lidar_pole_joint" type="fixed">
+    <parent link="base_link"/>
+    <child  link="lidar_pole"/>
+    <origin xyz="0.0 0.0 0.21" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ═══════════════════════════════════════
+       LIDAR SENSOR
+  ═══════════════════════════════════════ -->
+  <link name="lidar_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.05" length="0.07"/>
+      </geometry>
+      <material name="sensor_blue"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.05" length="0.07"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.3"/>
+      <inertia ixx="0.0001" ixy="0.0" ixz="0.0"
+               iyy="0.0001" iyz="0.0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <joint name="lidar_joint" type="fixed">
+    <parent link="lidar_pole"/>
+    <child  link="lidar_link"/>
+    <origin xyz="0.0 0.0 0.135" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ═══════════════════════════════════════
+       FRONT CAMERA
+  ═══════════════════════════════════════ -->
+  <link name="camera_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.05 0.12 0.05"/>
+      </geometry>
+      <material name="camera_black"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.05 0.12 0.05"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.1"/>
+      <inertia ixx="0.0001" ixy="0.0" ixz="0.0"
+               iyy="0.0001" iyz="0.0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <joint name="camera_joint" type="fixed">
+    <parent link="base_link"/>
+    <child  link="camera_link"/>
+    <origin xyz="0.375 0.0 0.05" rpy="0 0 0"/>
+  </joint>
+
+  <link name="camera_optical_link"/>
+
+  <joint name="camera_optical_joint" type="fixed">
+    <parent link="camera_link"/>
+    <child  link="camera_optical_link"/>
+    <origin xyz="0 0 0" rpy="-1.5708 0 -1.5708"/>
+  </joint>
+
+  <!-- ═══════════════════════════════════════
+       IMU
+  ═══════════════════════════════════════ -->
+  <link name="imu_link">
+    <visual>
+      <geometry>
+        <box size="0.04 0.04 0.01"/>
+      </geometry>
+      <material name="sensor_blue"/>
+    </visual>
+    <inertial>
+      <mass value="0.05"/>
+      <inertia ixx="0.00001" ixy="0.0" ixz="0.0"
+               iyy="0.00001" iyz="0.0" izz="0.00001"/>
+    </inertial>
+  </link>
+
+  <joint name="imu_joint" type="fixed">
+    <parent link="base_link"/>
+    <child  link="imu_link"/>
+    <origin xyz="0.0 0.0 0.05" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ═══════════════════════════════════════
+       GAZEBO — OMNI DIRECTIONAL (PLANAR MOVE)
+       Accepts full Twist: linear.x, linear.y, angular.z
+       No wheel-pair physics — kinematically correct holonomic motion
+  ═══════════════════════════════════════ -->
+  <!-- ═══════════════════════════════════════
+       GAZEBO — OMNI / 4WS PLANAR MOVE
+       Accepts full Twist: linear.x, linear.y, angular.z
+  ═══════════════════════════════════════ -->
+  <gazebo>
+    <plugin name="planar_move" filename="libgazebo_ros_planar_move.so">
+      <ros>
+        <namespace>/</namespace>
+      </ros>
+      <command_topic>cmd_vel</command_topic>
+      <odometry_topic>odom</odometry_topic>
+      <odometry_frame>odom</odometry_frame>
+      <robot_base_frame>base_footprint</robot_base_frame>
+      <odometry_rate>50.0</odometry_rate>
+      <publish_odom>true</publish_odom>
+      <publish_odom_tf>false</publish_odom_tf>
+    </plugin>
+  </gazebo>
+
+  <!-- ═══════════════════════════════════════
+       GAZEBO — WHEEL JOINT STATE PUBLISHER
+       Publishes the spinning wheel joint positions to /joint_states.
+       steering_animator.py publishes the steering joint angles to
+       the same topic so robot_state_publisher can render both.
+  ═══════════════════════════════════════ -->
+  <gazebo>
+    <plugin name="wheel_joint_state_publisher"
+            filename="libgazebo_ros_joint_state_publisher.so">
+      <ros>
+        <namespace>/</namespace>
+        <remapping>~/out:=joint_states</remapping>
+      </ros>
+      <update_rate>30</update_rate>
+      <joint_name>wheel_fl_joint</joint_name>
+      <joint_name>wheel_fr_joint</joint_name>
+      <joint_name>wheel_rl_joint</joint_name>
+      <joint_name>wheel_rr_joint</joint_name>
+    </plugin>
+  </gazebo>
+
+  <!-- ═══════════════════════════════════════
+       GAZEBO — LIDAR
+  ═══════════════════════════════════════ -->
+  <gazebo reference="lidar_link">
+    <sensor name="lidar" type="ray">
+      <always_on>true</always_on>
+      <visualize>true</visualize>
+      <update_rate>10.0</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>360</samples>
+            <resolution>1</resolution>
+            <min_angle>-3.14159</min_angle>
+            <max_angle>3.14159</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.15</min>
+          <max>15.0</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+      <plugin name="scan" filename="libgazebo_ros_ray_sensor.so">
+        <ros>
+          <remapping>~/out:=scan</remapping>
+          <argument>--ros-args --param use_sim_time:=true</argument>
+        </ros>
+        <output_type>sensor_msgs/LaserScan</output_type>
+        <frame_name>lidar_link</frame_name>
+      </plugin>
+    </sensor>
+  </gazebo>
+  <!-- ═══════════════════════════════════════
+       GAZEBO — CAMERA
+  ═══════════════════════════════════════ -->
+  <gazebo reference="camera_link">
+    <sensor name="front_camera" type="camera">
+      <always_on>true</always_on>
+      <visualize>true</visualize>
+      <update_rate>30.0</update_rate>
+      <camera>
+        <horizontal_fov>1.0472</horizontal_fov>
+        <image>
+          <width>640</width>
+          <height>480</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.05</near>
+          <far>20.0</far>
+        </clip>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.005</stddev>
+        </noise>
+      </camera>
+      <plugin name="camera_driver" filename="libgazebo_ros_camera.so">
+        <ros>
+          <remapping>image_raw:=front_camera/image_raw</remapping>
+          <remapping>camera_info:=front_camera/camera_info</remapping>
+        </ros>
+        <camera_name>front_camera</camera_name>
+        <frame_name>camera_optical_link</frame_name>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <!-- ═══════════════════════════════════════
+       GAZEBO — IMU
+  ═══════════════════════════════════════ -->
+  <gazebo reference="imu_link">
+    <sensor name="imu_sensor" type="imu">
+      <always_on>true</always_on>
+      <update_rate>100.0</update_rate>
+      <plugin name="imu_plugin" filename="libgazebo_ros_imu_sensor.so">
+        <ros>
+          <remapping>~/out:=imu</remapping>
+        </ros>
+        <initial_orientation_as_reference>false</initial_orientation_as_reference>
+      </plugin>
+      <imu>
+        <angular_velocity>
+          <x><noise type="gaussian"><mean>0.0</mean><stddev>0.002</stddev></noise></x>
+          <y><noise type="gaussian"><mean>0.0</mean><stddev>0.002</stddev></noise></y>
+          <z><noise type="gaussian"><mean>0.0</mean><stddev>0.002</stddev></noise></z>
+        </angular_velocity>
+        <linear_acceleration>
+          <x><noise type="gaussian"><mean>0.0</mean><stddev>0.017</stddev></noise></x>
+          <y><noise type="gaussian"><mean>0.0</mean><stddev>0.017</stddev></noise></y>
+          <z><noise type="gaussian"><mean>0.0</mean><stddev>0.017</stddev></noise></z>
+        </linear_acceleration>
+      </imu>
+    </sensor>
+  </gazebo>
+
+  <!-- ═══════════════════════════════════════
+       GAZEBO — WHEEL FRICTION
+       4WS wheels: planar_move drives the body directly.
+       Low friction avoids the contact physics fighting the plugin.
+       mu1=longitudinal (forward grip), mu2=lateral (side slip)
+  ═══════════════════════════════════════ -->
+  <gazebo reference="wheel_fl">
+    <mu1>0.8</mu1><mu2>0.1</mu2>
+    <kp>100000.0</kp><kd>10.0</kd>
+    <material>Gazebo/Black</material>
+  </gazebo>
+  <gazebo reference="wheel_fr">
+    <mu1>0.8</mu1><mu2>0.1</mu2>
+    <kp>100000.0</kp><kd>10.0</kd>
+    <material>Gazebo/Black</material>
+  </gazebo>
+  <gazebo reference="wheel_rl">
+    <mu1>0.8</mu1><mu2>0.1</mu2>
+    <kp>100000.0</kp><kd>10.0</kd>
+    <material>Gazebo/Black</material>
+  </gazebo>
+  <gazebo reference="wheel_rr">
+    <mu1>0.8</mu1><mu2>0.1</mu2>
+    <kp>100000.0</kp><kd>10.0</kd>
+    <material>Gazebo/Black</material>
+  </gazebo>
+
+  <!-- ═══════════════════════════════════════
+       GAZEBO — BODY COLORS
+  ═══════════════════════════════════════ -->
+  <gazebo reference="base_link">
+    <material>Gazebo/Yellow</material>
+  </gazebo>
+  <gazebo reference="top_panel">
+    <material>Gazebo/DarkGray</material>
+  </gazebo>
+  <gazebo reference="lidar_link">
+    <material>Gazebo/Blue</material>
+  </gazebo>
+  <gazebo reference="lidar_pole">
+    <material>Gazebo/Gray</material>
+  </gazebo>
+  <gazebo reference="camera_link">
+    <material>Gazebo/Black</material>
+  </gazebo>
+  <gazebo reference="imu_link">
+    <material>Gazebo/Blue</material>
+  </gazebo>
+
+</robot>
