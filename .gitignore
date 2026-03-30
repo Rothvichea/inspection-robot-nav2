@@ -23,3 +23,8 @@ Thumbs.db
 # Temporary files
 *.bag
 *.db3
+.claude/
+*.gv
+*.pdf
+rclpy
+time
