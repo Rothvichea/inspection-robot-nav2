@@ -354,7 +354,7 @@ ros2 run foxglove_bridge foxglove_bridge --ros-args -p use_sim_time:=true -p por
 
 ## Video Demos
 
-All project demonstrations available at [rothvicheachea.netlify.app](https://rothvicheachea.netlify.app)
+https://www.youtube.com/watch?v=YOr-bXfJsyM
 
 ---
 
